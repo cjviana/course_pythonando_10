@@ -14,7 +14,15 @@ def cadastro(request):
         username = request.POST.get('username')
         email = request.POST.get("email")
         senha = request.POST.get("senha")
-        confirmar_senha = request.POST.get('confirmar_senha') 
+        confirmar_senha = request.POST.get('confirmar_senha')
+
+        if senha != confirmar_senha:
+            messages.add_message(request, constants.ERROR, "Senhas não conferem!")
+            return redirect('/usuarios/cadastro')
+
+        if len(senha) < 6:
+            messages.add_message(request, constants.ERROR, "Senhas devem possuir mais de 6 posições!")
+            return redirect('/usuarios/cadastro')
 
         users = User.objects.filter(username=username)
 
@@ -22,23 +30,10 @@ def cadastro(request):
             messages.add_message(request, constants.ERROR, "Usuário já cadastrado!")
             return redirect('/usuarios/cadastro')
         
-        if senha != confirmar_senha:
-            messages.add_message(request, constants.ERROR, "Senhas não conferem!")
-            return redirect('/usuarios/cadastro')
-        
-        if len(senha) < 6:
-            messages.add_message(request, constants.ERROR, "Senhas deve possuir mais de 6 posições!")
-            return redirect('/usuarios/cadastro')
-        try:
-            User.objects.create_user(
-                username=username,
-                email=email,
-                password=senha
-            )
-            return redirect('/usuarios/login')
-        except:
-            print('Erro 4')
-            return redirect('/usuarios/cadastro')
+        user = User.objects.create_user(username=username,
+                                        email=email,
+                                        password=senha)
+        return redirect('/usuarios/login')
 
     
 def login(request):
@@ -51,8 +46,9 @@ def login(request):
         if user:
             auth.login(request, user)
             return redirect('/pacientes/home')
-        messages.add_message(request, constants.ERROR, 'Usuário ou senha incorretos')
-        return redirect('/usuarios/login')
+
+    messages.add_message(request, constants.ERROR, 'Usuário ou senha incorretos')
+    return redirect('/usuarios/login')
     
 
 def sair(request):
