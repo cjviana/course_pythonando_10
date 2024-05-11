@@ -25,13 +25,14 @@ class DadosMedico(models.Model):
     cedula_identidade_medica = models.ImageField(upload_to='cim')
     foto = models.ImageField(upload_to="fotos_perfil")
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    descricao = models.TextField(null=True, blank=True)
-    especialidade = models.ForeignKey(Especialidades, on_delete=models.DO_NOTHING, null=True, blank=True)
+    descricao = models.TextField()
     valor_consulta = models.FloatField(default=100)
+    especialidade = models.ForeignKey(Especialidades, on_delete=models.DO_NOTHING)
 
     def __str__(self):
         return self.user.username
     
+    @property
     def proxima_data(self):
         proxima_data = DatasAbertas.objects.filter(user=self.user).filter(data__gt=datetime.now()).filter(agendado=False).order_by('data').first()
         return proxima_data
